@@ -26,15 +26,17 @@ void createSliders()
   s3.setCaptionLabel("");
   //s3.setNumberOfTickMarks(40);
 
-  Slider s4 = controlP5.addSlider("AMP", 0, 1000, 0, AMPX, AMPY, 150, 20);   // this is the tach output slider
+  Slider s4 = controlP5.addSlider("AMP", 0, 800, 0, AMPX, AMPY, 146, 20);   // this is the tach output slider
   s4.setSliderMode(Slider.FLEXIBLE);
   s4.setMoveable(false);
   s4.valueLabel().setVisible(false);
   s4.setCaptionLabel("");
   //s4.setNumberOfTickMarks(199);
   s4.setHandleSize(5) ;
+  s4.setNumberOfTickMarks(9);  
 
-  Slider s5 = controlP5.addSlider("PPR", 1, 4, 0, TACHX+10, TACHY-21, 132, 20);  // this is the PPR slider
+
+  Slider s5 = controlP5.addSlider("PPR", 1, 4, 0, TACHX+10, TACHY-15, 132, 20);  // this is the PPR slider
   s5.setSliderMode(Slider.FLEXIBLE);
   s5.setMoveable(false);
   s5.valueLabel().setVisible(false);
@@ -97,7 +99,7 @@ void createlabels()
 
   SOClevellabel = controlP5.addTextlabel("label4", SOCvalue+" %", SOCX+SOCW+5, SOCY+5);    
 
-  PPRlabel = controlP5.addTextlabel("label15", tach +" PPR", TACHX+150, TACHY-22);
+  PPRlabel = controlP5.addTextlabel("label15", tach +" PPR", TACHX+150, TACHY-15);
 
   AMPLabel = controlP5.addTextlabel("label12", AMPvalue+" %", AMPX+160, AMPY-1);
 

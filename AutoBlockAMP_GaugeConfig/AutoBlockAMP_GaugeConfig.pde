@@ -44,6 +44,7 @@ int DCmsb;
 int DClsb;
 
 float SOCvalue = 1200;
+float previousSOCvalue;
 
 final int SlipEnd = int(0xC0);
 
@@ -92,7 +93,7 @@ ButtonLabel, TachLabel, ZEROLabel, CONLabel, AMPLabel, UPDATELabel, PPRlabel, FG
 DropdownList d2;
 String DDListname;
 
-Button PGRM, CON, LOAD, CONFIG, RUN;
+Button PGRM, CON, LOAD, CONFIG, RUN, FDOWN, FUP, EDOWN, EUP;
 
 String textValue = "";
 Textfield myTextfield;
@@ -262,7 +263,14 @@ void controlEvent(ControlEvent theControlEvent) {
 
   else {
 
-    if ((theControlEvent.controller().name().equals("FULL")) || (theControlEvent.controller().name().equals("EMPTY"))) {   // if range sliders are moved
+   if ((theControlEvent.controller().name().equals("FULL")) || 
+      (theControlEvent.controller().name().equals("EMPTY")) ||
+      (theControlEvent.controller().name().equals("FDOWN")) ||
+      (theControlEvent.controller().name().equals("FUP")) ||
+      (theControlEvent.controller().name().equals("EDOWN")) ||
+      (theControlEvent.controller().name().equals("EUP"))
+
+    ) {   // if range sliders are moved, or buttons are pressed.
 
       if (theControlEvent.controller().name().equals("FULL")) {
         TempMax = theControlEvent.controller().value();
@@ -271,8 +279,34 @@ void controlEvent(ControlEvent theControlEvent) {
       
       if (theControlEvent.controller().name().equals("EMPTY")) {
         TempMin = theControlEvent.controller().value();
+        controlP5.controller("SOC").setValue(0);       
+      }
+      
+      if (theControlEvent.controller().name().equals("FDOWN")) {
+        TempMax = TempMax-1;
+        controlP5.controller("SOC").setValue(100);    
+        controlP5.controller("FULL").setValue(TempMax);
+      }  
+
+
+      if (theControlEvent.controller().name().equals("FUP")) {
+        TempMax = TempMax+1;
+        controlP5.controller("SOC").setValue(100);    
+        controlP5.controller("FULL").setValue(TempMax);
+      }  
+
+
+      if (theControlEvent.controller().name().equals("EDOWN")) {
+        TempMin = TempMin-1;
         controlP5.controller("SOC").setValue(0);    
-        
+        controlP5.controller("EMPTY").setValue(TempMin);
+      }
+
+
+      if (theControlEvent.controller().name().equals("EUP")) {
+        TempMin = TempMin+1;
+        controlP5.controller("SOC").setValue(0);    
+        controlP5.controller("EMPTY").setValue(TempMin);
       }
 
       int Range = abs(int(TempMax)-int(TempMin));
@@ -330,19 +364,21 @@ void controlEvent(ControlEvent theControlEvent) {
 
       SOCvalue = theControlEvent.controller().value();
 
-      int Range = abs(int(TempMax)-int(TempMin));
+      if (SOCvalue != previousSOCvalue) {
 
-      if (TempMax > TempMin) { 
+        int Range = abs(int(TempMax)-int(TempMin));
 
-        Out = int(((SOCvalue/100))*Range)+int(TempMin);     
-        println(Out);
-      }
+        if (TempMax > TempMin) { 
 
-      else if (TempMax < TempMin) { 
+          Out = int(((SOCvalue/100))*Range)+int(TempMin);     
+          println(Out);
+        }
 
-        Out = int(TempMin)-int(((SOCvalue/100))*Range);
-        println(Out);
-      }
+        else if (TempMax < TempMin) { 
+
+          Out = int(TempMin)-int(((SOCvalue/100))*Range);
+          println(Out);
+        }
 
       if (CONNECTED == true) {
 
@@ -373,6 +409,9 @@ void controlEvent(ControlEvent theControlEvent) {
 
         //delay(200);
       }
+      
+      }
+       previousSOCvalue = SOCvalue;
     }
 
     if (theControlEvent.controller().name().equals("LL")) {
