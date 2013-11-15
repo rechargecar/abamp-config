@@ -568,7 +568,7 @@ void controlEvent(ControlEvent theControlEvent) {
         serialPort.clear();
         
         delay(100);
-       // LoadfromAB();   // why was this here again?
+        LoadfromAB();   // why was this here again? it seems to make diconnecting more consistant..I guess.
         serialPort.stop();
       }
     }
