@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class AutoBlockAMP_GaugeConfig extends PApplet {
 
- /**
+/**
  * ABamp configuration sketch
  *
  * Author:   RechargeCar Inc.
@@ -65,6 +65,7 @@ int DClsb;
 
 float SOCvalue = 1200;
 float previousSOCvalue;
+int windowindicator;   // 1 = SOC, 2 = TA, 3 = nonething
 
 final int SlipEnd = PApplet.parseInt(0xC0);
 
@@ -84,9 +85,9 @@ int TACHlsb;
 float AMPvalue = 100;
 
 int SerialX = 30, SerialY =    42;
-int PGMX =    30, PGMY =       CAPY+150;
+int PGMX =   410, PGMY =       60;
 int CONX =   195, CONY =       17;
-int LOADX =  100, LOADY =      CAPY+150;
+int LOADX =  510, LOADY =      60;
 
 float TempMin;
 float TempMax;
@@ -107,13 +108,17 @@ int OUTPUTMODE = 0;
 
 boolean CONNECTED = false;
 
-Textlabel FULLLabel, EMPTYLabel, LevelLabel, LLLabel, SOClevellabel, LLlevellabel, CAPLabel, CAPlevelLabel, 
-ButtonLabel, TachLabel, ZEROLabel, CONLabel, AMPLabel, UPDATELabel, PPRlabel, FGLabel, TALabel, FGHIGHLabel, FGLOWLabel;
+Textlabel FULLLabel, EMPTYLabel, LevelLabel, LLLabel, SOClevellabel, LLlevellabel, CAPLabel, 
+CAPlevelLabel, TachLabel, ZEROLabel, CONLabel, AMPLabel, UPDATELabel, PPRlabel, FGLabel, 
+TALabel, FGHIGHLabel, FGLOWLabel, LLlevellabel_LOADED, PPRlabel_LOADED, CAPlevelLabel_LOADED, 
+FGHIGHLabel_LOADED, FGLOWLabel_LOADED;
 
 DropdownList d2;
 String DDListname;
 
 Button PGRM, CON, LOAD, CONFIG, RUN, FDOWN, FUP, EDOWN, EUP;
+
+Slider s1, s2, s3, s4, s5, s6, s7;
 
 String textValue = "";
 Textfield myTextfield;
@@ -143,10 +148,10 @@ ControlFont labelFont1;
 
 
 public void setup() {
-  size(500, 500);
+  size(600, 500);
 
- // smooth();
- // frameRate(10);
+  // smooth();
+  // frameRate(10);
 
   controlP5 = new ControlP5(this);
 
@@ -157,9 +162,9 @@ public void setup() {
 
   p2 = createFont("Arial", 16);
   labelFont = new ControlFont(p2);
-  
+
   p1 = createFont("Arial", 14);
-    labelFont1 = new ControlFont(p1);
+  labelFont1 = new ControlFont(p1);
 
   textSize(30);
 
@@ -175,7 +180,13 @@ public void setup() {
   customize2(d2);
 
   img = loadImage("ABSWtitle.png");  // Load the image into the program
+
+  windowindicator = 3;
 }
+
+int darkerbox = 75;   // actually lighter
+int lighterbox = 35;   
+
 
 public void draw() {
 
@@ -185,68 +196,110 @@ public void draw() {
 
   image(img, 315, 385);   //15
 
-  fill(color(35));    // big box  //40
-  quad(29, 91, //60
-  465, 91, 
-  465, 262,  //232
-  29, 262); 
+    if (windowindicator == 1) {      
+    fill(color(darkerbox));    // big box darker
+    quad(29, 91, 465, 91, 465, 262, 29, 262);
 
-  fill(color(35));    // small box
-  quad(29, 308, //248
-  465, 308, 
-  465, 357, //297
-  29, 357); 
-  
-  fill(color(70));    // FG box
-  quad(29, 65, //60
-  190, 65, 
-  190, 91,  //232
-  29, 91); 
-  
-  fill(color(70));    // TA box
-  quad(29, 282, //60
-  165, 282, 
-  165, 308,  //232
-  29, 308); 
+    fill(color(lighterbox));    // small box
+    quad(29, 308, 465, 308, 465, 357, 29, 357);
 
-  fill(0xFF39E444);
+    fill(color(darkerbox));    // FG box
+    quad(29, 65, 190, 65, 190, 91, 29, 91); 
+
+    fill(color(lighterbox));    // TA box
+    quad(29, 282, 165, 282, 165, 308, 29, 308);
+  }
+
+  if (windowindicator == 2)  
+  {
+    fill(color(lighterbox));    // big box lighter
+    quad(29, 91, 465, 91, 465, 262, 29, 262);
+
+    fill(color(darkerbox));    // small box
+    quad(29, 308, 465, 308, 465, 357, 29, 357);
+
+    fill(color(lighterbox));    // FG box
+    quad(29, 65, 190, 65, 190, 91, 29, 91); 
+
+    fill(color(darkerbox));    // TA box
+    quad(29, 282, 165, 282, 165, 308, 29, 308);
+  }
+
+  if (windowindicator == 3) {      
+    fill(color(lighterbox));    // big box darker
+    quad(29, 91, 465, 91, 465, 262, 29, 262);
+
+    fill(color(lighterbox));    // small box
+    quad(29, 308, 465, 308, 465, 357, 29, 357);
+
+    fill(color(lighterbox));    // FG box
+    quad(29, 65, 190, 65, 190, 91, 29, 91); 
+
+    fill(color(lighterbox));    // TA box
+    quad(29, 282, 165, 282, 165, 308, 29, 308);
+  }
+  
+    fill(color(lighterbox));    // AB box
+    quad(LOADX-1, 90, LOADX+60, 90, LOADX+60, 400, LOADX-1, 400);
+  
 
   SOClevellabel.setValue(round(SOCvalue)+"%");
   SOClevellabel.setControlFont(labelFont);
-  SOClevellabel.draw(this);
+  SOClevellabel.setVisible(CONNECTED);
 
   LLlevellabel.setValue(round(LLvalue)+"%");
   LLlevellabel.setControlFont(labelFont);
-  LLlevellabel.draw(this);
+  LLlevellabel.setVisible(CONNECTED);
 
   AMPLabel.setValue(round(AMPvalue)+"A");
   AMPLabel.setControlFont(labelFont);
-  AMPLabel.draw(this);
+  AMPLabel.setVisible(CONNECTED);
 
   PPRlabel.setValue(round(tach)+" PPR");
   PPRlabel.setControlFont(labelFont);
-  PPRlabel.draw(this);
+  PPRlabel.setVisible(CONNECTED);
 
   FGHIGHLabel.setValue(round(TempMax)+"");
   FGHIGHLabel.setControlFont(labelFont);
-  FGHIGHLabel.draw(this);
-  
+  FGHIGHLabel.setVisible(CONNECTED);
+
   FGLOWLabel.setValue(round(TempMin)+"");
   FGLOWLabel.setControlFont(labelFont);
-  FGLOWLabel.draw(this);
+  FGLOWLabel.setVisible(CONNECTED);
 
   CAPlevelLabel.setValue(round(CAPvalue)+"Ah");
   CAPlevelLabel.setControlFont(labelFont);
-  CAPlevelLabel.draw(this);
-  
-    if (SOCvalue < LLvalue) {      
+  CAPlevelLabel.setVisible(CONNECTED);
+
+  // LLlevellabel_LOADED.setValue(round(CAPvalue)+"Ah");
+  LLlevellabel_LOADED.setControlFont(labelFont);
+  LLlevellabel_LOADED.setVisible(CONNECTED);
+
+  // PPRlabel_LOADED.setValue(round(CAPvalue)+"Ah");
+  PPRlabel_LOADED.setControlFont(labelFont);
+  PPRlabel_LOADED.setVisible(CONNECTED);
+
+  // CAPlevelLabel_LOADED.setValue(round(CAPvalue)+"Ah"); //
+  CAPlevelLabel_LOADED.setControlFont(labelFont);
+  CAPlevelLabel_LOADED.setVisible(CONNECTED);
+
+  // FGHIGHLabel_LOADED.setValue(TempFGH);
+  FGHIGHLabel_LOADED.setControlFont(labelFont);
+  FGHIGHLabel_LOADED.setVisible(CONNECTED);
+
+  //FGLOWLabel_LOADED.setValue(round(CAPvalue)+"Ah");
+  FGLOWLabel_LOADED.setControlFont(labelFont);
+  FGLOWLabel_LOADED.setVisible(CONNECTED);
+
+
+  if (SOCvalue < LLvalue) {      
     SOClevellabel.setColorValue(0xFFDE1616);
   }
   else
   {
     SOClevellabel.setColorValue(0xFFFFFFFF);
   }
-  
+  //}
 
   if (!(controlP5.window().isMouseOver(d2)) && mousePressed) {
     d2.close();
@@ -259,7 +312,30 @@ public void draw() {
     }
     d2.setHeight(((Serial.list().length)+1)*23);
   }
-  
+
+  if (CONNECTED == true) { 
+
+    if ((mouseX > 29 && mouseX < 465 && 
+      mouseY > 91 && mouseY < 262 && mousePressed) || 
+      (mouseX > 29 && mouseX < 190 && 
+      mouseY > 65 && mouseY < 91 && mousePressed) )      
+
+    {
+
+      AMPvalue = 0;
+      controlP5.controller("AMP").setValue(AMPvalue); 
+      windowindicator = 1;
+    }
+
+    if ((mouseX > 29 && mouseX < 465 && 
+      mouseY > 308 && mouseY < 357 && mousePressed) || 
+      (mouseX > 29 && mouseX < 165 && 
+      mouseY > 282 && mouseY < 308 && mousePressed))
+
+    {
+      windowindicator = 2;
+    }
+  }
 }
 
 public void controlEvent(ControlEvent theControlEvent) {
@@ -283,7 +359,7 @@ public void controlEvent(ControlEvent theControlEvent) {
 
   else {
 
-   if ((theControlEvent.controller().name().equals("FULL")) || 
+    if ((theControlEvent.controller().name().equals("FULL")) || 
       (theControlEvent.controller().name().equals("EMPTY")) ||
       (theControlEvent.controller().name().equals("FDOWN")) ||
       (theControlEvent.controller().name().equals("FUP")) ||
@@ -291,66 +367,63 @@ public void controlEvent(ControlEvent theControlEvent) {
       (theControlEvent.controller().name().equals("EUP"))
 
     ) {   // if range sliders are moved, or buttons are pressed.
-
-      if (theControlEvent.controller().name().equals("FULL")) {
-        TempMax = theControlEvent.controller().value();
-        controlP5.controller("SOC").setValue(100); 
-  }
-      
-      if (theControlEvent.controller().name().equals("EMPTY")) {
-        TempMin = theControlEvent.controller().value();
-        controlP5.controller("SOC").setValue(0);       
-      }
-      
-      if (theControlEvent.controller().name().equals("FDOWN")) {
-        TempMax = TempMax-1;
-        controlP5.controller("SOC").setValue(100);    
-        controlP5.controller("FULL").setValue(TempMax);
-      }  
-
-
-      if (theControlEvent.controller().name().equals("FUP")) {
-        TempMax = TempMax+1;
-        controlP5.controller("SOC").setValue(100);    
-        controlP5.controller("FULL").setValue(TempMax);
-      }  
-
-
-      if (theControlEvent.controller().name().equals("EDOWN")) {
-        TempMin = TempMin-1;
-        controlP5.controller("SOC").setValue(0);    
-        controlP5.controller("EMPTY").setValue(TempMin);
-      }
-
-
-      if (theControlEvent.controller().name().equals("EUP")) {
-        TempMin = TempMin+1;
-        controlP5.controller("SOC").setValue(0);    
-        controlP5.controller("EMPTY").setValue(TempMin);
-      }
-
-      int Range = abs(PApplet.parseInt(TempMax)-PApplet.parseInt(TempMin));
-
-      if (TempMax > TempMin) { 
-
-        Out = PApplet.parseInt(((SOCvalue/100))*Range)+PApplet.parseInt(TempMin);
-        //  println(Out);
-        FGH = PApplet.parseInt(TempMax);   // just changed these...
-        FGL = PApplet.parseInt(TempMin);
-      }
-
-      else if (TempMax < TempMin) { 
-
-        Out = PApplet.parseInt(TempMin)-PApplet.parseInt(((SOCvalue/100))*Range);
-        //   println(Out);
-    //    FGH = int(TempMin);
-    //    FGL = int(TempMax);
-           FGH = PApplet.parseInt(TempMax);   // just changed these...
-        FGL = PApplet.parseInt(TempMin);
-    
-      }
-
       if (CONNECTED == true) {
+
+        if (theControlEvent.controller().name().equals("FULL")) {
+          TempMax = theControlEvent.controller().value();
+          controlP5.controller("SOC").setValue(100);
+        }
+
+        if (theControlEvent.controller().name().equals("EMPTY")) {
+          TempMin = theControlEvent.controller().value();
+          controlP5.controller("SOC").setValue(0);
+        }
+
+        if (theControlEvent.controller().name().equals("FDOWN")) {
+          TempMax = TempMax-1;
+          controlP5.controller("SOC").setValue(100);    
+          controlP5.controller("FULL").setValue(TempMax);
+        }  
+
+        if (theControlEvent.controller().name().equals("FUP")) {
+          TempMax = TempMax+1;
+          controlP5.controller("SOC").setValue(100);    
+          controlP5.controller("FULL").setValue(TempMax);
+        }  
+
+        if (theControlEvent.controller().name().equals("EDOWN")) {
+          TempMin = TempMin-1;
+          controlP5.controller("SOC").setValue(0);    
+          controlP5.controller("EMPTY").setValue(TempMin);
+        }
+
+        if (theControlEvent.controller().name().equals("EUP")) {
+          TempMin = TempMin+1;
+          controlP5.controller("SOC").setValue(0);    
+          controlP5.controller("EMPTY").setValue(TempMin);
+        }
+
+        int Range = abs(PApplet.parseInt(TempMax)-PApplet.parseInt(TempMin));
+
+        if (TempMax > TempMin) { 
+
+          Out = PApplet.parseInt(((SOCvalue/100))*Range)+PApplet.parseInt(TempMin);
+          //  println(Out);
+          FGH = PApplet.parseInt(TempMax);   // just changed these...
+          FGL = PApplet.parseInt(TempMin);
+        }
+
+        else if (TempMax < TempMin) { 
+
+          Out = PApplet.parseInt(TempMin)-PApplet.parseInt(((SOCvalue/100))*Range);
+          //   println(Out);
+          //    FGH = int(TempMin);
+          //    FGL = int(TempMax);
+          FGH = PApplet.parseInt(TempMax);   // just changed these...
+          FGL = PApplet.parseInt(TempMin);
+        }
+
+        //if (CONNECTED == true) {
 
         slipStart();    //Version, Payload Size MSB, Payload Size LSB, Packet Type, Duty Cycle MSB, Duty Cycle LSB, Checksum
 
@@ -376,7 +449,9 @@ public void controlEvent(ControlEvent theControlEvent) {
         slipSend(0x00);     // checksum
         slipEnd();
 
-        //delay(200);
+        delay(100);
+
+        windowindicator = 1;
       }
     }
 
@@ -400,49 +475,60 @@ public void controlEvent(ControlEvent theControlEvent) {
           println(Out);
         }
 
-      if (CONNECTED == true) {
+        if (CONNECTED == true) {      
 
-        slipStart();
-        //Version, Payload Size MSB, Payload Size LSB, Packet Type, Duty Cycle MSB, Duty Cycle LSB, Checksum
+          AMPvalue = 0;
+          controlP5.controller("AMP").setValue(AMPvalue); 
+          windowindicator = 1;  
+          //println("1"); 
 
-        slipSend(0x00);    //version
-        slipSend(0x00);    //Payload Size MSB
-        slipSend(0x05);    //Payload Size LSB
-        slipSend(0x14);    //Packet type
+          slipStart();
+          //Version, Payload Size MSB, Payload Size LSB, Packet Type, Duty Cycle MSB, Duty Cycle LSB, Checksum
 
-        DCmsb = (Out >> 8) & 0x03;
-        DClsb = (Out & 0xff);
+          slipSend(0x00);    //version
+          slipSend(0x00);    //Payload Size MSB
+          slipSend(0x05);    //Payload Size LSB
+          slipSend(0x14);    //Packet type
 
-        slipSend(DCmsb);    //Duty Cycle MSB
-        slipSend(DClsb);    //Duty Cycle LSB  
+          DCmsb = (Out >> 8) & 0x03;
+          DClsb = (Out & 0xff);
 
-        slipSend(tach);
+          slipSend(DCmsb);    //Duty Cycle MSB
+          slipSend(DClsb);    //Duty Cycle LSB  
 
-        TACHmsb = (round(AMPvalue) >> 8) & 0x03;
-        TACHlsb = (round(AMPvalue) & 0xff);
+          slipSend(tach);
 
-        slipSend(TACHmsb);    //Duty Cycle MSB
-        slipSend(TACHlsb);    //Duty Cycle LSB
+          TACHmsb = (round(AMPvalue) >> 8) & 0x03;
+          TACHlsb = (round(AMPvalue) & 0xff);
 
-        slipSend(0x00);     // checksum
-        slipEnd();
+          slipSend(TACHmsb);    //Duty Cycle MSB
+          slipSend(TACHlsb);    //Duty Cycle LSB
 
-        //delay(200);
+          slipSend(0x00);     // checksum
+          slipEnd();
+
+          //delay(200);
+        }
       }
-      
-      }
-       previousSOCvalue = SOCvalue;
+      previousSOCvalue = SOCvalue;
     }
 
     if (theControlEvent.controller().name().equals("LL")) {
       LLvalue = PApplet.parseInt(theControlEvent.controller().value());
       //  println("LL is "+round(LLvalue));
+      if (CONNECTED == true) {  
+
+        windowindicator = 1;
+      }
     }
 
     if (theControlEvent.controller().name().equals("AMP")) {
       AMPvalue = theControlEvent.controller().value();
 
-      if (CONNECTED == true) {
+      if (CONNECTED == true) {    
+
+        windowindicator = 2;
+        //println("2");
 
         slipStart();
         slipSend(0x00);    //version
@@ -468,16 +554,26 @@ public void controlEvent(ControlEvent theControlEvent) {
 
     if (theControlEvent.controller().name().equals("PPR")) {
       tach = round(theControlEvent.controller().value());
+
+      if (CONNECTED == true) {  
+
+        windowindicator = 2;
+      }
     }
 
     if (theControlEvent.controller().name().equals("CAP")) {
       CAPvalue = theControlEvent.controller().value();
+      if (CONNECTED == true) {  
+
+        windowindicator = 1;
+      }
     }
 
     if (theControlEvent.controller().name().equals("PGRM")) {
 
-
       if (CONNECTED == true) {
+
+     
 
         slipStart();
         slipSend(0x00);    //version
@@ -499,8 +595,8 @@ public void controlEvent(ControlEvent theControlEvent) {
 
         slipSend(tach);     
 
-        slipSend((Slope >> 8) & 0x03);   
-        slipSend(Slope & 0xff);  
+        slipSend((Slope >> 8) & 0x03);    
+        slipSend(Slope & 0xff);   
 
         slipSend(PApplet.parseByte((Intercept&0x0000FF00)>>8));
         slipSend(PApplet.parseByte((Intercept&0x000000FF)));
@@ -509,50 +605,96 @@ public void controlEvent(ControlEvent theControlEvent) {
 
         slipSend(0x00);     // checksum
         slipEnd();
+
+        print("FGH is: "+FGH);
+        println(", FGL is: "+FGL);
+        println("LL is: "+LLvalue); 
+        println("CAP is: "+CAPvalue);          
+        println("tach is: "+tach); 
+        println("Slope is: "+Slope); 
+        println("Intercept is: "+Intercept);
         
-                  print("FGH is: "+FGH);
-          println(", FGL is: "+FGL);
-          println("LL is: "+LLvalue); 
-          println("CAP is: "+CAPvalue);          
-          println("tach is: "+tach); 
-          println("Slope is: "+Slope); 
-          println("Intercept is: "+Intercept);
-        
-        
-        
+       // LoadfromAB();
+           windowindicator = 3;
       }
     }
 
 
     if (theControlEvent.controller().name().equals("LOAD")) {   //this updates range values
-       
-       // updateSOC();
-        
-        LoadfromAB();
-    }
 
+        if (CONNECTED == true) { 
+        // updateSOC();
+        LoadfromAB();
+        windowindicator = 3;
+      }
+    }
 
     if (theControlEvent.controller().name().equals("CON")) { 
 
       if (CONNECTED == false && portselected == true) {
 
         CONNECTED = true; 
-        
-         openPortAndGo();
-        println("First attempt to connect");;
+
+        openPortAndGo();
+        println("First attempt to connect");
+        //;
         controlP5.getController("CON").setCaptionLabel("CONNECTED");
         CON.setWidth(112);
         CON.setColorForeground(0xFF39E444);
         CON.setColorBackground(0xFF00C90D);
-        
+
         PGRM.setColorBackground(0xFF00C90D);
         PGRM.setColorForeground(0xFF39E444);
         PGRM.setColorActive(0xFF67E46F);
-        
+
         LOAD.setColorBackground(0xFF00C90D);
         LOAD.setColorForeground(0xFF39E444);
         LOAD.setColorActive(0xFF67E46F);
-        
+
+        s1.setColorBackground(0xFF00C90D);
+        s1.setColorForeground(0xFF39E444);
+        s1.setColorActive(0xFF67E46F);
+
+        s2.setColorBackground(color(50));
+        s2.setColorActive(0xFFD1526C);
+        s2.setColorForeground(0xFF95001E);
+
+        s3.setColorBackground(0xFF00C90D);
+        s3.setColorForeground(0xFF39E444);
+        s3.setColorActive(0xFF67E46F);
+
+        s4.setColorBackground(0xFF00C90D);
+        s4.setColorForeground(0xFF39E444);
+        s4.setColorActive(0xFF67E46F);
+
+        s5.setColorBackground(0xFF00C90D);
+        s5.setColorForeground(0xFF39E444);
+        s5.setColorActive(0xFF67E46F);
+
+        s6.setColorBackground(color(60));
+        s6.setColorForeground(0xFF39E444);
+        s6.setColorActive(0xFF67E46F);
+
+        s7.setColorBackground(color(60));
+        s7.setColorForeground(0xFF39E444);
+        s7.setColorActive(0xFF67E46F);
+
+        FDOWN.setColorBackground(0xFF00C90D);
+        FDOWN.setColorForeground(0xFF39E444);
+        FDOWN.setColorActive(0xFF67E46F);
+
+        FUP.setColorBackground(0xFF00C90D);
+        FUP.setColorForeground(0xFF39E444);
+        FUP.setColorActive(0xFF67E46F);
+
+        EDOWN.setColorBackground(0xFF00C90D);
+        EDOWN.setColorForeground(0xFF39E444);
+        EDOWN.setColorActive(0xFF67E46F);
+
+        EUP.setColorBackground(0xFF00C90D);
+        EUP.setColorForeground(0xFF39E444);
+        EUP.setColorActive(0xFF67E46F);
+
         delay(100);
 
         if (serialReader.available() == false) {   // check to see if we connected, if not, close and try again
@@ -562,20 +704,21 @@ public void controlEvent(ControlEvent theControlEvent) {
           openPortAndGo();
           println("2nd attempt");
         }
-        
-         LoadfromAB();
-        
+
+        LoadfromAB();
+
+        windowindicator = 3;
       }
 
       else if (CONNECTED == true && portselected == true) {
 
         CONNECTED = false;
-        
+
         controlP5.getController("CON").setCaptionLabel("CONNECT");
         CON.setWidth(89);
         CON.setColorBackground(color(60));
         CON.setColorForeground(0xFF00C90D);
-        
+
         PGRM.setColorBackground(color(60));
         PGRM.setColorForeground(color(60));
         PGRM.setColorActive(color(60));
@@ -584,12 +727,57 @@ public void controlEvent(ControlEvent theControlEvent) {
         LOAD.setColorForeground(color(60));
         LOAD.setColorActive(color(60));
 
+        s1.setColorBackground(color(60));
+        s1.setColorForeground(color(60));
+        s1.setColorActive(color(60));
+
+        s2.setColorBackground(color(60));
+        s2.setColorForeground(color(60));
+        s2.setColorActive(color(60));
+
+        s3.setColorBackground(color(60));
+        s3.setColorForeground(color(60));
+        s3.setColorActive(color(60));
+
+        s4.setColorBackground(color(60));
+        s4.setColorForeground(color(60));
+        s4.setColorActive(color(60));
+
+        s5.setColorBackground(color(60));
+        s5.setColorForeground(color(60));
+        s5.setColorActive(color(60));
+
+        s6.setColorBackground(color(60));
+        s6.setColorForeground(color(60));
+        s6.setColorActive(color(60));
+
+        s7.setColorBackground(color(60));
+        s7.setColorForeground(color(60));
+        s7.setColorActive(color(60));
+
+        FDOWN.setColorBackground(color(60));
+        FDOWN.setColorForeground(color(60));
+        FDOWN.setColorActive(color(60));
+
+        FUP.setColorBackground(color(60));
+        FUP.setColorForeground(color(60));
+        FUP.setColorActive(color(60));
+
+        EDOWN.setColorBackground(color(60));
+        EDOWN.setColorForeground(color(60));
+        EDOWN.setColorActive(color(60));
+
+        EUP.setColorBackground(color(60));
+        EUP.setColorForeground(color(60));
+        EUP.setColorActive(color(60));
+
 
         serialPort.clear();
-        
+
         delay(100);
-       // LoadfromAB();   // why was this here again?
+        LoadfromAB();   // why was this here again? it seems to make diconnecting more consistant..I guess.
         serialPort.stop();
+        windowindicator = 3;
       }
     }
   }
@@ -604,12 +792,12 @@ public void openPortAndGo() {
 
 public void slipStart() {
   serialPort.write(0xC0);
- // delay(10);
+  // delay(10);
 }
 
 public void slipEnd() {
   serialPort.write(0xC0);
- // println("");
+  // println("");
 }
 
 public void slipSend (int dataByte) { 
@@ -626,8 +814,7 @@ public void slipSend (int dataByte) {
     serialPort.write(0xDD);//SlipEscEsc
   }
 
-  //print(hex(dataByte, 2) +" ");  
-  
+  //print(hex(dataByte, 2) +" ");
 }
 
 public void customize2(DropdownList ddl2) {
@@ -693,30 +880,38 @@ public void LoadfromAB() {
           Loaded = true; 
 
           controlP5.controller("EMPTY").setValue(TempFGL);    
-          controlP5.controller("FULL").setValue(TempFGH);         
+          controlP5.controller("FULL").setValue(TempFGH);  
+
+          CAPlevelLabel_LOADED.setValue(round(CAPvalue)+"Ah");    
+          PPRlabel_LOADED.setValue(round(tach)+" PPR");   
+          LLlevellabel_LOADED.setValue(round(LLvalue)+" %");
+          FGHIGHLabel_LOADED.setValue(TempFGH+"");
+          FGLOWLabel_LOADED.setValue(round(TempFGL)+"");
 
 
-//          if (TempFGH > TempFGL) {
-//
-//            controlP5.controller("EMPTY").setValue(TempFGL);    
-//            controlP5.controller("FULL").setValue(TempFGH);        
-//
-//            FGH = TempFGL;
-//            FGL = TempFGH;
-//          }
-//
-//          else if (TempFGH < TempFGL) {
-//
-//            controlP5.controller("EMPTY").setValue(TempFGH);    
-//            controlP5.controller("FULL").setValue(TempFGL);    
-//
-            FGH = TempFGH;
-            FGL = TempFGL;
-//          }      
+          //          if (TempFGH > TempFGL) {
+          //
+          //            controlP5.controller("EMPTY").setValue(TempFGL);    
+          //            controlP5.controller("FULL").setValue(TempFGH);        
+          //
+          //            FGH = TempFGL;
+          //            FGL = TempFGH;
+          //          }
+          //
+          //          else if (TempFGH < TempFGL) {
+          //
+          //            controlP5.controller("EMPTY").setValue(TempFGH);    
+          //            controlP5.controller("FULL").setValue(TempFGL);    
+          //
+          FGH = TempFGH;
+          FGL = TempFGL;
+          //          }      
 
           controlP5.controller("LL").setValue(LLvalue);         
           controlP5.controller("CAP").setValue(CAPvalue);
           controlP5.controller("PPR").setValue(tach);
+          
+          
         }
       }
     }
@@ -727,68 +922,79 @@ public void LoadfromAB() {
 public void updateSOC()
 {
   if (CONNECTED == true) {
-   slipStart();
-        //Version, Payload Size MSB, Payload Size LSB, Packet Type, Duty Cycle MSB, Duty Cycle LSB, Checksum
+    slipStart();
+    //Version, Payload Size MSB, Payload Size LSB, Packet Type, Duty Cycle MSB, Duty Cycle LSB, Checksum
 
-        slipSend(0x00);    //version
-        slipSend(0x00);    //Payload Size MSB
-        slipSend(0x05);    //Payload Size LSB
-        slipSend(0x14);    //Packet type
+    slipSend(0x00);    //version
+    slipSend(0x00);    //Payload Size MSB
+    slipSend(0x05);    //Payload Size LSB
+    slipSend(0x14);    //Packet type
 
-        DCmsb = (Out >> 8) & 0x03;
-        DClsb = (Out & 0xff);
+    DCmsb = (Out >> 8) & 0x03;
+    DClsb = (Out & 0xff);
 
-        slipSend(DCmsb);    //Duty Cycle MSB
-        slipSend(DClsb);    //Duty Cycle LSB  
+    slipSend(DCmsb);    //Duty Cycle MSB
+    slipSend(DClsb);    //Duty Cycle LSB  
 
-        slipSend(tach);
+    slipSend(tach);
 
-        TACHmsb = (round(AMPvalue) >> 8) & 0x03;
-        TACHlsb = (round(AMPvalue) & 0xff);
+    TACHmsb = (round(AMPvalue) >> 8) & 0x03;
+    TACHlsb = (round(AMPvalue) & 0xff);
 
-        slipSend(TACHmsb);    //Duty Cycle MSB
-        slipSend(TACHlsb);    //Duty Cycle LSB
+    slipSend(TACHmsb);    //Duty Cycle MSB
+    slipSend(TACHlsb);    //Duty Cycle LSB
 
-        slipSend(0x00);     // checksum
-        slipEnd();
-        
-        Out= Out+1;
-        
-       // println(DCmsb);
-       // println(DClsb);
-       // println(Out);
-        
+    slipSend(0x00);     // checksum
+    slipEnd();
+
+    Out= Out+1;
+
+    // println(DCmsb);
+    // println(DClsb);
+    // println(Out);
+  }
 }
-}
+
 public void createSliders()
 {
 
-  Slider s1 = controlP5.addSlider("SOC", 0, 100, 50, SOCX, SOCY, SOCW, SOCH);  //this is the SOC slider
+  s1 = controlP5.addSlider("SOC", 0, 100, 50, SOCX, SOCY, SOCW, SOCH);  //this is the SOC slider
   s1.setSliderMode(Slider.FIX);
   s1.setMoveable(false);
   s1.valueLabel().setVisible(false);
   s1.setCaptionLabel("");
   s1.setHandleSize(5) ;
+  s1.setColorBackground(color(60));
+  s1.setColorForeground(color(60));
+  s1.setColorActive(color(60));
 
-  Slider s2 = controlP5.addSlider("LL", 0, 100, 15, LLX, LLY, LLW, LLH);    // this is the warning slider
+  s2 = controlP5.addSlider("LL", 0, 100, 15, LLX, LLY, LLW, LLH);    // this is the warning slider
   s2.setSliderMode(Slider.FLEXIBLE);
   s2.setMoveable(false);
   s2.valueLabel().setVisible(false);
   s2.setCaptionLabel("");
   //s2.setNumberOfTickMarks(51);
-  s2.setColorBackground(color(50));
-  s2.setColorActive(0xFFD1526C);
-  s2.setColorForeground(0xFF95001E);
-  s2.setHandleSize(5) ;
+//  s2.setColorBackground(color(50));
+//  s2.setColorActive(0xFFD1526C);
+//  s2.setColorForeground(0xFF95001E);
+  // s2.setHandleSize(15) ;
+  //s2.setNumberOfTickMarks(21);
+    s2.setColorBackground(color(60));
+  s2.setColorForeground(color(60));
+  s2.setColorActive(color(60));
 
-  Slider s3 = controlP5.addSlider("CAP", 1, 300, 200, CAPX, CAPY, CAPW, CAPH);  // this is capacity slider
+
+  s3 = controlP5.addSlider("CAP", 1, 300, 200, CAPX, CAPY, CAPW, CAPH);  // this is capacity slider
   //s3.setSliderMode(Slider.FIX);
   s3.setMoveable(false);
   s3.valueLabel().setVisible(false);
   s3.setCaptionLabel("");
   //s3.setNumberOfTickMarks(40);
+    s3.setColorBackground(color(60));
+  s3.setColorForeground(color(60));
+  s3.setColorActive(color(60));
 
-  Slider s4 = controlP5.addSlider("AMP", 0, 800, 0, AMPX, AMPY, 146, 20);   // this is the tach output slider
+  s4 = controlP5.addSlider("AMP", 0, 800, 0, AMPX, AMPY, 150, 20);   // this is the tach output slider
   s4.setSliderMode(Slider.FLEXIBLE);
   s4.setMoveable(false);
   s4.valueLabel().setVisible(false);
@@ -796,30 +1002,42 @@ public void createSliders()
   //s4.setNumberOfTickMarks(199);
   s4.setHandleSize(5) ;
   s4.setNumberOfTickMarks(9);  
+      s4.setColorBackground(color(60));
+  s4.setColorForeground(color(60));
+  s4.setColorActive(color(60));
 
-
-  Slider s5 = controlP5.addSlider("PPR", 1, 4, 0, TACHX+10, TACHY-15, 132, 20);  // this is the PPR slider
+  s5 = controlP5.addSlider("PPR", 1, 4, 0, TACHX+10, TACHY-15, 132, 20);  // this is the PPR slider
   s5.setSliderMode(Slider.FLEXIBLE);
   s5.setMoveable(false);
   s5.valueLabel().setVisible(false);
   s5.setCaptionLabel("");
   s5.setNumberOfTickMarks(4);  
+      s5.setColorBackground(color(60));
+  s5.setColorForeground(color(60));
+  s5.setColorActive(color(60));
 
-  Slider s6 = controlP5.addSlider("FULL", 0, 1023, (1024/4)*3, SOCX+25, SOC2, SOCW-50, 20);  //this is the FULL slider
+  s6 = controlP5.addSlider("FULL", 0, 1023, (1024/4)*3, SOCX+25, SOC2, SOCW-50, 20);  //this is the FULL slider
   s6.setSliderMode(Slider.FLEXIBLE);
   s6.setMoveable(false);
   s6.valueLabel().setVisible(false);
   s6.setCaptionLabel("");
   s6.setHandleSize(10) ;
-  s6.setColorBackground(color(50));
-
-  Slider s7 = controlP5.addSlider("EMPTY", 0, 1023, (1024/4)*1, SOCX+25, SOC3, SOCW-50, 20);  //this is the EMPTY slider
+//  s6.setColorBackground(color(60));
+//  s6.setColorForeground(0xFF39E444);
+//  s6.setColorActive(0xFF67E46F);
+    s6.setColorBackground(color(60));
+  s6.setColorForeground(color(60));
+  s6.setColorActive(color(60));
+   
+  s7 = controlP5.addSlider("EMPTY", 0, 1023, (1024/4)*1, SOCX+25, SOC3, SOCW-50, 20);  //this is the EMPTY slider
   s7.setSliderMode(Slider.FLEXIBLE);
   s7.setMoveable(false);
   s7.valueLabel().setVisible(false);
   s7.setCaptionLabel("");
   s7.setHandleSize(10) ;
-  s7.setColorBackground(color(50));
+      s7.setColorBackground(color(60));
+  s7.setColorForeground(color(60));
+  s7.setColorActive(color(60));
 }
 
 public void createlabels()
@@ -828,15 +1046,15 @@ public void createlabels()
   LLLabel = controlP5.addTextlabel("label3", "WARN", 34, LLY);   //LLX-64
   LLLabel.draw(this); 
   LLLabel.setControlFont(labelFont);
-  
+
   LevelLabel = controlP5.addTextlabel("label2", "LEVEL", 34, SOCY+10);  //SOCX-64
   LevelLabel.draw(this); 
   LevelLabel.setControlFont(labelFont);
-  
+
   FULLLabel = controlP5.addTextlabel("label17", "FULL", 34, SOC2);   //RangeX-67
   FULLLabel.draw(this); 
   FULLLabel.setControlFont(labelFont);
-  
+
   EMPTYLabel = controlP5.addTextlabel("label", "EMPTY", 34, SOC3);  // rangeX-67
   EMPTYLabel.draw(this); 
   EMPTYLabel.setControlFont(labelFont);
@@ -844,12 +1062,12 @@ public void createlabels()
   CAPLabel = controlP5.addTextlabel("label6", "PACK", 34, CAPY-0);   //CAPX-55
   CAPLabel.draw(this); 
   CAPLabel.setControlFont(labelFont);
-  
+
   FGLabel = controlP5.addTextlabel("label8", "FUEL GAUGE SETUP", 34, LLY-31);   //LLX-64
   FGLabel.draw(this); 
   FGLabel.setControlFont(labelFont1);
   FGLabel.setColorValue(60);
-  
+
   TALabel = controlP5.addTextlabel("label9", "TACH-AMMETER", 34, LLY+186);   //LLX-64
   TALabel.draw(this); 
   TALabel.setControlFont(labelFont1);
@@ -857,20 +1075,31 @@ public void createlabels()
 
 
 
-  LLlevellabel = controlP5.addTextlabel("label5", LLvalue +" %", LLX+LLW+1, LLY);  
-
-  SOClevellabel = controlP5.addTextlabel("label4", SOCvalue+" %", SOCX+SOCW+5, SOCY+5);    
-
-  PPRlabel = controlP5.addTextlabel("label15", tach +" PPR", TACHX+150, TACHY-15);
-
-  AMPLabel = controlP5.addTextlabel("label12", AMPvalue+" %", AMPX+160, AMPY-1);
-
-  CAPlevelLabel = controlP5.addTextlabel("label7", CAPvalue + "Ah", CAPX+CAPW+5, CAPY-1);
+  LLlevellabel = controlP5.addTextlabel("label5", LLvalue +" %", SOCX+SOCW+5, LLY); 
   
+  LLlevellabel_LOADED = controlP5.addTextlabel("label23", LLvalue +" %", LOADX, LLY);  // NEW
+
+  SOClevellabel = controlP5.addTextlabel("label4", SOCvalue+" %", SOCX+SOCW+5, SOCY+9);    
+
+  PPRlabel = controlP5.addTextlabel("label15", tach +" PPR", TACHX+150, TACHY-15); 
+  
+  PPRlabel_LOADED = controlP5.addTextlabel("label24", tach +" PPR", LOADX, TACHY-15);  // NEW
+
+  AMPLabel = controlP5.addTextlabel("label12", AMPvalue+" %", SOCX+SOCW+5, AMPY-1); 
+
+  CAPlevelLabel = controlP5.addTextlabel("label7", CAPvalue + "Ah", SOCX+SOCW+5, CAPY-1); 
+  
+  CAPlevelLabel_LOADED = controlP5.addTextlabel("label25", CAPvalue + "Ah", LOADX, CAPY-1);  // NEW
+
   FGHIGHLabel = controlP5.addTextlabel("label21", 0 + "", CAPX+CAPW+5, CAPY-55);
   
-  FGLOWLabel = controlP5.addTextlabel("label22", 0 + "", CAPX+CAPW+5, CAPY-28);  
+  FGHIGHLabel_LOADED = controlP5.addTextlabel("label26", 0 + "", LOADX, CAPY-55);  // NEW
+
+  FGLOWLabel = controlP5.addTextlabel("label22", 0 + "", CAPX+CAPW+5, CAPY-28);
   
+  FGLOWLabel_LOADED = controlP5.addTextlabel("label27", 0 + "", LOADX, CAPY-28);  // NEW
+  
+ 
 }
 
 public void createButtons()
@@ -922,27 +1151,35 @@ public void createButtons()
   CON.setColorBackground(color(60));
   CON.setColorActive(color(60));
   CON.setColorForeground(color(60));
-  
-  
+
+
   FDOWN = controlP5.addButton("FDOWN", 0, SOCX, SOC2, 20, 20);
   FDOWN.setCaptionLabel("");  
+  FDOWN.setColorBackground(color(60));
+  FDOWN.setColorForeground(color(60));
+  FDOWN.setColorActive(color(60));
 
   FUP = controlP5.addButton("FUP", 0, SOCW+80, SOC2, 20, 20);
   FUP.setCaptionLabel("");  
+  FUP.setColorBackground(color(60));
+  FUP.setColorForeground(color(60));
+  FUP.setColorActive(color(60));
 
   EDOWN = controlP5.addButton("EDOWN", 0, SOCX, SOC3, 20, 20);
   EDOWN.setCaptionLabel("");  
+  EDOWN.setColorBackground(color(60));
+  EDOWN.setColorForeground(color(60));
+  EDOWN.setColorActive(color(60));
 
   EUP = controlP5.addButton("EUP", 0, SOCW+80, SOC3, 20, 20);
-  EUP.setCaptionLabel("");  
+  EUP.setCaptionLabel(""); 
+  EUP.setColorBackground(color(60));
+  EUP.setColorForeground(color(60));
+  EUP.setColorActive(color(60)); 
 
 
 
-//  Slider s6 = controlP5.addSlider("FULL", 0, 1023, (1024/4)*3, SOCX+25, SOC2, SOCW-50, 20);  //this is the FULL slider
-
-  
-  
-  
+  //  Slider s6 = controlP5.addSlider("FULL", 0, 1023, (1024/4)*3, SOCX+25, SOC2, SOCW-50, 20);  //this is the FULL slider
 }
 
 /*
