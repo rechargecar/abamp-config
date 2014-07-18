@@ -1,0 +1,6 @@
+NOTE:
+
+In recent versions of OS X, Apple has introduced the "Gatekeeper" system which makes it more difficult to run applications exported from Processing. Gatekeeper requires applications to be "signed" or they will be reported as damaged. To prevent this message, visit System Preferences -> Security and Privacy and select "Allow apps downloaded from anywhere".
+
+Sorry for the inconvenience, we are working on understanding what needs to be done to have our code "signed" with Apple.
+
