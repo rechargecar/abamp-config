@@ -1,3 +1,0 @@
-[]
-AutoBlockAMP_GaugeConfig
-AutoBlockAMP_GaugeConfig.jar,core.jar,jogl-all.jar,gluegen-rt.jar,jogl-all-natives-windows-amd64.jar,gluegen-rt-natives-windows-amd64.jar,controlP5.jar,jssc.jar,serial.jar
